@@ -13,6 +13,7 @@ public class AppDbContext : DbContext
         _configuration = configuration;
     }
 
+    public DbSet<Company> Companies { get; set; }
     public DbSet<DailyBar> DailyBars { get; set; }  // Add this DbSet for BarData
     public DbSet<MinuteBar> MinuteBars { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -25,7 +26,20 @@ public class AppDbContext : DbContext
     {
 
 
+        // Configure Company entity
+        modelBuilder.Entity<Company>().ToTable("companies");
 
+        modelBuilder.Entity<Company>()
+            .Property(c => c.Id).HasColumnName("id").IsRequired();
+
+        modelBuilder.Entity<Company>()
+            .Property(c => c.Ticker).HasColumnName("ticker").IsRequired().HasMaxLength(10);
+
+        modelBuilder.Entity<Company>()
+            .Property(c => c.CompanyDescription).HasColumnName("company_description").IsRequired();
+
+        modelBuilder.Entity<Company>()
+            .Property(c => c.Sector).HasColumnName("sector").IsRequired().HasMaxLength(100);
 
         // Configure BarData entity
         modelBuilder.Entity<MinuteBar>()
