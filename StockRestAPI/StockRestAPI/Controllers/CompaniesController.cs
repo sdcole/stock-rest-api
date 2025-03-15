@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 namespace StockRestAPI.Controllers
 {
     [ApiController]
-    [Route("")]
+    [Route("api/market")]
     public class CompaniesController : Controller
     {
         private readonly AppDbContext _context;

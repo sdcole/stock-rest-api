@@ -14,7 +14,7 @@ namespace StockRestAPI.Controllers
      * 
      **/
     [ApiController]
-    [Route("")]
+    [Route("api/market")]
     public class DailyBarsController : Controller
     {
 

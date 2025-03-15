@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using StockRestAPI.Models;
 
 namespace StockRestAPI.Controllers
 {
@@ -14,7 +15,7 @@ namespace StockRestAPI.Controllers
      * 
      **/
     [ApiController]
-    [Route("")]
+    [Route("api/market")]
     public class MinuteBarsController : Controller
     {
         
@@ -26,12 +27,28 @@ namespace StockRestAPI.Controllers
 
 
         [HttpGet("v1/minute-bars")]
-        public async Task<IActionResult> GetMinuteBars(string ticker, DateTime startTime, DateTime endTime)
+        public async Task<IActionResult> GetMinuteBars(string ticker, DateTime startTime, DateTime endTime, string? interval)
         {
-            var minuteBars = await _context.MinuteBars
+            List<MinuteBar> minuteBars = new List<MinuteBar>();
+
+            if (interval == null || interval == "1m")
+            {
+                minuteBars = await _context.MinuteBars
                 .Where(mb => mb.Symbol.ToUpper() == ticker.Trim().ToUpper() && mb.Timestamp >= startTime.ToUniversalTime()) // Optional startTime
                 .OrderBy(mb => mb.Timestamp) // Order by Timestamp in ascending order
                 .ToListAsync(); // Async database query
+            }
+            else if(interval == "1h")
+            {
+                minuteBars = await _context.MinuteBars
+                .Where(mb => mb.Symbol.ToUpper() == ticker.Trim().ToUpper() 
+                && mb.Timestamp >= startTime.ToUniversalTime()
+                && mb.Timestamp.Minute == 0
+                && mb.Timestamp.Second == 0) // Optional startTime
+                .OrderBy(mb => mb.Timestamp) // Order by Timestamp in ascending order
+                .ToListAsync(); // Async database query
+            }
+            
 
             return StatusCode(200, minuteBars);
         }

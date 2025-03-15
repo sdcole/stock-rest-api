@@ -13,10 +13,10 @@ builder.Services.AddCors(options =>
 });
 
 
-// Clear default configuration sources and add a custom one
+
 builder.Configuration
     .SetBasePath(Directory.GetCurrentDirectory())  // Set the base path
-    .AddJsonFile("config.json", optional: false, reloadOnChange: true);
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
 
 
@@ -41,9 +41,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-//app.UseHttpsRedirection();
 
-app.UseAuthorization();
 
 app.MapControllers();
 
