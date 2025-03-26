@@ -398,3 +398,5 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+StockRestAPI/StockRestAPI/config.json
+StockRestAPI/StockRestAPI/config.Development.json
