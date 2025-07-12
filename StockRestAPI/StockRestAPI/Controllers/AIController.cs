@@ -10,8 +10,11 @@ namespace StockRestAPI.Controllers
 {
     [ApiController]
     [Route("api/ai")]
-    public class AIController : Controller
+    public class AIController(IConfiguration configuration) : Controller
     {
+
+
+        private readonly string _aiEndpoint = configuration["ApiEndpoints:AI"];
 
         /**
          * This will make API calls to the local OLAMMA instance
@@ -19,12 +22,12 @@ namespace StockRestAPI.Controllers
          * 
          **/
         [HttpPost("v1/prompt-json")]
-        public async Task<IActionResult> PromptJson()
+        public async Task<IActionResult> PromptJson(SimplePromptRequest request)
         {
             var promptWithJsonRequest = new PromptWithJsonRequest
             {
-                Prompt = "This is a test for connectivity, respond with 'Hello World!'",
-                Model = "deepseek-r1:8b",
+                Prompt = request.Prompt,
+                Model = "llama3:8b-instruct-q4_K_M",
                 Stream = false
             };
 
@@ -37,7 +40,7 @@ namespace StockRestAPI.Controllers
 
             var httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
 
-            var response = await client.PostAsync("", httpContent);
+            var response = await client.PostAsync(_aiEndpoint + "/api/generate", httpContent);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -47,9 +50,15 @@ namespace StockRestAPI.Controllers
             var result = await response.Content.ReadAsStringAsync();
 
             //This will ignore any of the "Thoughts" the ai model will have before it responds.
-            result = Regex.Replace(result, @"\u003cthink\u003e.*?\u003c/think\u003e\n\n", "", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+            using var doc = JsonDocument.Parse(result);
 
-            return StatusCode(200,result);
+            string rawResponse = doc.RootElement.GetProperty("response").GetString();
+
+            // Remove the <think>...</think> section using regex
+            string cleaned = Regex.Replace(rawResponse, @"<think>.*?</think>\s*", "", RegexOptions.Singleline);
+
+ 
+            return StatusCode(200, new { response = cleaned.Trim() });
         }
 
 
